@@ -84,6 +84,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       if (productIndexInCart >= 0) {
         const updatedCart = cart.filter((product) => product.id !== productId);
         updateCart(updatedCart);
+      } else {
+        throw new Error("not found");
       }
     } catch {
       toast.error("Erro na remoção do produto");
@@ -99,16 +101,13 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         return;
       }
 
+      const { data: productStock } = await api.get<Stock>(`stock/${productId}`);
+
       const productIndexInCart = cart.findIndex(
         (product) => product.id === productId
       );
       if (productIndexInCart >= 0) {
-        const productInCart = cart[productIndexInCart];
-
         // stock check
-        const { data: productStock } = await api.get<Stock>(
-          `stock/${productInCart.id}`
-        );
         if (productStock.amount < amount) {
           toast.error("Quantidade solicitada fora de estoque");
           return;
